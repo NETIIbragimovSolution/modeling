@@ -156,6 +156,30 @@ def print_sample_stats(n1, n2, m1, s1, m2, s2):
     )
 
 
+def print_pearson_result(label, result, alpha):
+    if result is None:
+        print(
+            "\nКритерий Пирсона ({0}): недостаточно данных или нельзя добиться E >= 5 в каждом кармане (увеличьте n или уменьшите число интервалов).".format(
+                label
+            )
+        )
+        return
+    print("\nКритерий Пирсона:")
+    print("H0: эмпирическое распределение согласуется с N(a, sigma^2) с заданными a и sigma.")
+    print("Выборка: {0}".format(label))
+    print("chi^2_набл = {0:.6f}".format(result["chi2"]))
+    print("Число степеней свободы k = d - r - 1, r = 0 (параметры закона заданы): k = {0}".format(result["df"]))
+    print("Число карманов d (после объединения малых E): {0}".format(result["num_bins"]))
+    print(
+        "Критическое значение chi^2 для k = {0} и уровня значимости alpha = {1} найдите по таблице распределения chi^2.".format(
+            result["df"], alpha
+        )
+    )
+    print(
+        "Правило: если chi^2_набл <= chi^2_крит из таблицы — H0 не отвергают; если больше — отвергают."
+    )
+
+
 def print_smirnov_result(d, d_alpha, accept_h0, alpha):
     beta = 1.0 - alpha
     print("\nКритерий Смирнова:")

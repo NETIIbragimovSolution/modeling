@@ -25,11 +25,16 @@ def run_one_experiment(n1, n2, bins, alpha, mean_a, sigma, draw_plot):
     d, d_alpha, ok = compute.smirnov_two_sample(sample_clt, sample_box, alpha)
     io.print_smirnov_result(d, d_alpha, ok, alpha)
 
+    p_clt = compute.pearson_chi2_normal_gof(sample_clt, bins, mean_a, sigma)
+    io.print_pearson_result("1 (ЦПТ)", p_clt, alpha)
+    p_box = compute.pearson_chi2_normal_gof(sample_box, bins, mean_a, sigma)
+    io.print_pearson_result("2 (Бокс-Маллер)", p_box, alpha)
+
     if draw_plot:
         io.print_plot_notice()
         t1 = "Выборка 1 (ЦПТ), a={0}, sigma={1}".format(mean_a, sigma)
         t2 = "Выборка 2 (Бокс-Маллер), a={0}, sigma={1}".format(mean_a, sigma)
-        plot_two_histograms(sample_clt, sample_box, bins, t1, t2)
+        plot_two_histograms(sample_clt, sample_box, bins, t1, t2, mean_a, sigma)
 
 
 def study_sample_size(n_list, bins, alpha, mean_a, sigma):
