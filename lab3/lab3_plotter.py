@@ -80,8 +80,8 @@ def plot_all(results, params):
     fig3, ax3 = plt.subplots(figsize=(9, 4))
     ax3.plot(ts, Y11s, color=_C_BLUE,   linewidth=1.5, label="y11 — звено 11 (лин. A)")
     ax3.plot(ts, Y21s, color=_C_ORANGE, linewidth=1.5, label="y21 — звено 21 (лин. B, ст. 1)")
-    ax3.plot(ts, Y12s, color=_C_GREEN,  linewidth=1.5, label="y12 — звено 12 (лин. B, ст. 2)")
-    ax3.plot(ts, Y22s, color=_C_RED,    linewidth=1.5, label="y22 — звено 22 (лин. B, ст. 3)")
+    ax3.plot(ts, Y12s, color=_C_GREEN,  linewidth=1.5, label="y12 — звено B2 (лин. B, ст. 2)")
+    ax3.plot(ts, Y22s, color=_C_RED,    linewidth=1.5, label="y22 — звено B3 (лин. B, ст. 3)")
     _ax_style(ax3, "Уровни обрабатывающих звеньев yij(t)", "Время t", "Уровень")
     fig3.tight_layout()
 

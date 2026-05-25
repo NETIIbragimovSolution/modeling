@@ -43,8 +43,8 @@ def run_simulation(params):
     X_init = float(params["X_init"])
     D11 = max(Dmin, min(Dmax, y11 / X_init))
     D21 = max(Dmin, min(Dmax, y21 / X_init))
-    D22 = max(Dmin, min(Dmax, y12 / X_init))
-    D23 = max(Dmin, min(Dmax, y22 / X_init))
+    D22 = max(Dmin, min(Dmax, y12 / X_init))   # ст. 2 линии B — y12 (рис.7)
+    D23 = max(Dmin, min(Dmax, y22 / X_init))   # ст. 3 линии B — y22 (рис.7)
 
     crit_A = 0.2 * y0A_init
     crit_B = 0.2 * y0B_init
@@ -75,9 +75,9 @@ def run_simulation(params):
     while t < T:
         # --- темпы потоков ---
         X11 = y11 / (D11 + eps)   # линия A: выход звена 11
-        X21 = y21 / (D21 + eps)   # линия B: выход звена 21
-        X22 = y12 / (D22 + eps)   # линия B: выход звена 12
-        X23 = y22 / (D23 + eps)   # линия B: выход звена 22
+        X21 = y21 / (D21 + eps)   # линия B: выход звена 21 (ст. 1)
+        X22 = y12 / (D22 + eps)   # линия B: выход звена y12 (ст. 2, рис.7)
+        X23 = y22 / (D23 + eps)   # линия B: выход звена y22 (ст. 3, рис.7)
 
         # входные потоки ограничены складом
         X10A = min(X11, y0A / (dt + eps))
@@ -95,8 +95,8 @@ def run_simulation(params):
         # --- обновление уровней (формула 7) ---
         y11_new = y11 + dt * (X10A - X11)
         y21_new = y21 + dt * (X10B - X21)
-        y12_new = y12 + dt * (X21  - X22)
-        y22_new = y22 + dt * (X22  - X23)
+        y12_new = y12 + dt * (X21  - X22)   # ст. 2 (y12): вход X21, выход X22
+        y22_new = y22 + dt * (X22  - X23)   # ст. 3 (y22): вход X22, выход X23
         yCA_new = yCA + dt * X11  - PA * Zc * dt
         yCB_new = yCB + dt * X23  - PB * Zc * dt
         y0A_new = y0A - dt * X10A
@@ -111,12 +111,11 @@ def run_simulation(params):
         y0A_new = max(y0A_new, 0.0)
         y0B_new = max(y0B_new, 0.0)
 
-        # --- обновление задержек (формула 6) ---
-        # знаменатель = D_old * X_old = y_old (уровень пред. шага)
-        denom11 = D11 * X11 + eps
-        denom21 = D21 * X21 + eps
-        denom22 = D22 * X22 + eps
-        denom23 = D23 * X23 + eps
+        # --- обновление задержек (формула 6): D_new = Dmin + Dср*(y_new/D_old) ± α*Dmax ---
+        denom11 = D11   # знаменатель — старая задержка D_ij(t-Δt)
+        denom21 = D21
+        denom22 = D22
+        denom23 = D23
 
         if abs(delta_mu) > dmu_dop:
             sgn = 1.0 if delta_mu > 0 else -1.0
@@ -126,8 +125,8 @@ def run_simulation(params):
         # если A опережает (sgn>0): замедляем A (D11↑), ускоряем B (D21,D22,D23↓)
         D11_new = Dmin + Dsr * (y11_new / denom11) + alpha * Dmax * sgn
         D21_new = Dmin + Dsr * (y21_new / denom21) - alpha * Dmax * sgn
-        D22_new = Dmin + Dsr * (y12_new / denom22) - alpha * Dmax * sgn
-        D23_new = Dmin + Dsr * (y22_new / denom23) - alpha * Dmax * sgn
+        D22_new = Dmin + Dsr * (y12_new / denom22) - alpha * Dmax * sgn   # ст. 2 — y12 (рис.7)
+        D23_new = Dmin + Dsr * (y22_new / denom23) - alpha * Dmax * sgn   # ст. 3 — y22 (рис.7)
 
         D11_new = max(Dmin, min(Dmax, D11_new))
         D21_new = max(Dmin, min(Dmax, D21_new))
@@ -173,13 +172,13 @@ def run_simulation(params):
         D22s.append(D22)
         D23s.append(D23)
 
-        if y0A <= stop_A and y0B <= stop_B:
+        if y0A <= stop_A or y0B <= stop_B:   # останавливаемся при опустошении любого склада
             break
 
     total_Zc = 0.0
     i = 0
     while i < len(Zcs):
-        total_Zc += Zcs[i]
+        total_Zc += Zcs[i] * dt   # интегрируем темп выпуска по времени
         i += 1
 
     return {
